@@ -30,19 +30,6 @@ router.post(
       min: 3,
     }),
     check("email", "Email is required").isEmail(),
-    check("password")
-      .isLength({ min: 8, max: 20 })
-      .withMessage("Required min 8 characters")
-      .custom((value) => {
-        let pattern = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
-
-        if (pattern.test(value)) {
-          return true;
-        }
-      })
-      .withMessage(
-        "min 8 characters which contain at least one numeric digit and a special character"
-      ),
   ],
   async (req, res) => {
     try {
@@ -106,10 +93,7 @@ router.post(
 // User Login
 router.post(
   "/login",
-  [
-    check("email", "Email is required").isEmail(),
-    check("password", "password feild is required").isLength({ min: 8 }),
-  ],
+  [check("email", "Email is required").isEmail()],
   async (req, res) => {
     try {
       // error handling
