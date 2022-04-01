@@ -1,17 +1,17 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { validationResult, Result, check } = require('express-validator');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User.model');
+const { validationResult, Result, check } = require("express-validator");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user.model");
 
 const newToken = (user) => {
   return jwt.sign({ user }, `${process.env.JWT_SECRET}`);
 };
 
-var nodemailer = require('nodemailer');
+var nodemailer = require("nodemailer");
 
 var transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
     user: `${process.env.USER}`,
     pass: `${process.env.pass}`,
@@ -21,18 +21,18 @@ var transporter = nodemailer.createTransport({
 //User Registration
 
 router.post(
-  '',
+  "",
   [
-    check('firstName', 'Firstname should be atleast 3 characters').isLength({
+    check("firstName", "Firstname should be atleast 3 characters").isLength({
       min: 3,
     }),
-    check('lastName', 'Lastname should be atleast 3 characters').isLength({
+    check("lastName", "Lastname should be atleast 3 characters").isLength({
       min: 3,
     }),
-    check('email', 'Email is required').isEmail(),
-    check('password')
+    check("email", "Email is required").isEmail(),
+    check("password")
       .isLength({ min: 8, max: 20 })
-      .withMessage('Required min 8 characters')
+      .withMessage("Required min 8 characters")
       .custom((value) => {
         let pattern = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
 
@@ -41,7 +41,7 @@ router.post(
         }
       })
       .withMessage(
-        'min 8 characters which contain at least one numeric digit and a special character'
+        "min 8 characters which contain at least one numeric digit and a special character"
       ),
   ],
   async (req, res) => {
@@ -58,7 +58,7 @@ router.post(
       let user = await User.findOne({ email: req.body.email }).lean().exec();
 
       if (user) {
-        return res.status(400).send({ message: 'Email already exist' });
+        return res.status(400).send({ message: "Email already exist" });
       }
 
       user = await User.create(req.body);
@@ -68,7 +68,7 @@ router.post(
       const mailOptions = {
         from: `Team Expedia ${process.env.USER}`,
         to: `${email}`,
-        subject: 'New Account Created Successfully',
+        subject: "New Account Created Successfully",
         text: `${firstName} Your Account Created Successfully!`,
       };
 
@@ -105,10 +105,10 @@ router.post(
 
 // User Login
 router.post(
-  '/login',
+  "/login",
   [
-    check('email', 'Email is required').isEmail(),
-    check('password', 'password feild is required').isLength({ min: 8 }),
+    check("email", "Email is required").isEmail(),
+    check("password", "password feild is required").isLength({ min: 8 }),
   ],
   async (req, res) => {
     try {
@@ -126,7 +126,7 @@ router.post(
       if (!user)
         return res
           .status(400)
-          .send({ message: 'Please try another email or password' });
+          .send({ message: "Please try another email or password" });
 
       // if user is found then we will match the passwords
       const match = user.checkPassword(req.body.password);
@@ -134,7 +134,7 @@ router.post(
       if (!match)
         return res
           .status(400)
-          .send({ message: 'Please try another email or password' });
+          .send({ message: "Please try another email or password" });
 
       const token = newToken(user);
       const { _id, firstName, lastName, email } = user;
@@ -149,8 +149,8 @@ router.post(
 
 // Forgot Password
 router.put(
-  '/forgot-password',
-  [check('email', 'Email is required').isEmail()],
+  "/forgot-password",
+  [check("email", "Email is required").isEmail()],
   async (req, res) => {
     try {
       const errors = validationResult(req);
@@ -168,13 +168,13 @@ router.put(
 
       if (!user) {
         return res.status(400).json({
-          message: 'User not found !',
+          message: "User not found !",
         });
       }
 
       // if user found in DB --> create token
       const token = jwt.sign({ _id: user._id }, `${process.env.JWT_SECRET}`, {
-        expiresIn: '15m',
+        expiresIn: "15m",
       });
 
       let currentDate = new Date();
@@ -182,7 +182,7 @@ router.put(
       const data = {
         from: process.env.USER,
         to: email,
-        subject: 'Password Reset Link',
+        subject: "Password Reset Link",
         html: `
                 <p>Hey we have received request for reset your account password on ${currentDate}</p> 
                 <h1>Please use the following Link to reset your account password . Link will be get deactivated after 15 minute</h1>
@@ -195,7 +195,7 @@ router.put(
       User.updateOne({ resetLink: token }, (err, success) => {
         if (err) {
           return res.status(400).json({
-            message: 'Reset Link Error',
+            message: "Reset Link Error",
           });
         } else {
           transporter.sendMail(data, function (error, info) {
@@ -218,11 +218,11 @@ router.put(
 
 //Reset Password
 router.put(
-  '/reset-password',
+  "/reset-password",
   [
-    check('newPassword')
+    check("newPassword")
       .isLength({ min: 8, max: 20 })
-      .withMessage('Required min 8 characters')
+      .withMessage("Required min 8 characters")
       .custom((value) => {
         let pattern = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
 
@@ -231,7 +231,7 @@ router.put(
         }
       })
       .withMessage(
-        'min 8 characters which contain at least one numeric digit and a special character'
+        "min 8 characters which contain at least one numeric digit and a special character"
       ),
   ],
   async (req, res) => {
@@ -249,12 +249,12 @@ router.put(
       User.findOne({ resetLink }, (err, user) => {
         if (err || !user) {
           return res.status(400).json({
-            message: 'User not found with the token',
+            message: "User not found with the token",
           });
         }
 
         user.password = newPassword;
-        user.resetLink = '';
+        user.resetLink = "";
         user.save((err, result) => {
           if (err) {
             return res.status(400).json({
@@ -263,7 +263,7 @@ router.put(
           }
 
           return res.json({
-            message: 'Your password has been changed',
+            message: "Your password has been changed",
           });
         });
       });
@@ -276,14 +276,14 @@ router.put(
 );
 
 //Get User By Email
-router.get('/user', async (req, res) => {
+router.get("/user", async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email }).select(
-      '-password'
+      "-password"
     );
 
     if (!user) {
-      return res.status(400).send({ message: 'User Not Found' });
+      return res.status(400).send({ message: "User Not Found" });
     }
 
     return res.send(user);
