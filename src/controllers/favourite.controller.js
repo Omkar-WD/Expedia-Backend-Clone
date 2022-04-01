@@ -70,6 +70,7 @@ router.get('/userFavList', async (req, res) => {
 
     const favItems = await Favourite.findOne({ userId: req.body.userId })
       .populate('userId')
+      .populate('hotelId')
       .lean()
       .exec();
     console.log(favItems);
