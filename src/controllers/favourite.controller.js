@@ -1,11 +1,11 @@
-const Favourite = require('../models/favourite.model');
-const express = require('express');
+const Favourite = require("../models/favourite.model");
+const express = require("express");
 const router = express.Router();
 
 //Get Fav List
-router.get('', async (req, res) => {
+router.get("", async (req, res) => {
   try {
-    const favItems = await Favourite.find().populate('hotelId').lean().exec();
+    const favItems = await Favourite.find().populate("hotelId").lean().exec();
 
     return res.send(favItems);
   } catch (error) {
@@ -14,7 +14,7 @@ router.get('', async (req, res) => {
 });
 
 // Add to list
-router.post('', async (req, res) => {
+router.post("", async (req, res) => {
   try {
     const { userId, hotelId } = req.body;
 
@@ -37,14 +37,14 @@ router.post('', async (req, res) => {
 });
 
 //update fav list
-router.put('', async (req, res) => {
+router.put("", async (req, res) => {
   try {
     const { userId, hotelId } = req.body;
 
     const user = await Favourite.findOne({ userId }).lean().exec();
 
     if (!user) {
-      return res.status(201).send('Empty Favourite list');
+      return res.status(201).send("Empty Favourite list");
     }
 
     let favItems = await Favourite.updateOne(
@@ -56,7 +56,7 @@ router.put('', async (req, res) => {
     //   await Favourite.fin
     // }
 
-    console.log('hotels', favItems._id, favItems.hotelId);
+    console.log("hotels", favItems._id, favItems.hotelId);
     return res.send(favItems);
   } catch (error) {
     return res.status(500).send({ message: error.message });
@@ -64,13 +64,28 @@ router.put('', async (req, res) => {
 });
 
 // user fav list
-router.get('/userFavList', async (req, res) => {
-  try {
-    const { userId } = req.body;
+// router.get('/userFavList', async (req, res) => {
+//   try {
+//     const { userId } = req.body;
 
-    const favItems = await Favourite.findOne({ userId: req.body.userId })
-      .populate('userId')
-      .populate('hotelId')
+//     const favItems = await Favourite.findOne({ userId: req.body.userId })
+//       .populate('userId')
+//       .populate('hotelId')
+//       .lean()
+//       .exec();
+//     console.log(favItems);
+
+//     return res.send(favItems);
+//   } catch (error) {
+//     return res.status(500).send({ message: error.message });
+//   }
+// });
+
+router.get("/userFavList/:id", async (req, res) => {
+  try {
+    const favItems = await Favourite.findOne({ userId: req.params.id })
+      .populate("userId")
+      .populate("hotelId")
       .lean()
       .exec();
     console.log(favItems);
