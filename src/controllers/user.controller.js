@@ -5,13 +5,17 @@ const router = express.Router();
 
 router.patch("/update", async (req, res) => {
   try {
-    console.log(req.auth);
-    const user = await User.findByIdAndUpdate(req.body.userId, req.body, {
-      new: true,
-    })
+    console.log(req.body);
+    const user = await User.findByIdAndUpdate(
+      req.body.userId,
+      req.body.userData,
+      {
+        new: true,
+      }
+    )
       .lean()
       .exec();
-
+    console.log(user);
     return res.send(user);
   } catch (error) {
     return res.status({ error: error.message });

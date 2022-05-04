@@ -121,9 +121,9 @@ router.post(
           .send({ message: "Please try another email or password" });
 
       const token = newToken(user);
-      const { _id, firstName, lastName, email } = user;
+      // const { _id, firstName, lastName, email } = user;
 
-      res.send({ user: { _id, firstName, lastName, email }, token });
+      res.send({ user, token });
     } catch (error) {
       console.log(error);
       return res.status(500).send(error.message);
